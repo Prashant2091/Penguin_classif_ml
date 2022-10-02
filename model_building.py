@@ -6,7 +6,7 @@ Created on Mon Oct  3 04:36:55 2022
 """
 
 import pandas as pd
-penguins = pd.read_csv('penguins_cleaned.csv')
+penguins = pd.read_csv('https://raw.githubusercontent.com/dataprofessor/streamlit_freecodecamp/main/app_8_classification_penguins/penguins_cleaned.csv')
 
 # Ordinal feature encoding
 # https://www.kaggle.com/pratik1120/penguin-dataset-eda-classification-and-clustering
