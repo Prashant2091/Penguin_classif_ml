@@ -1,85 +1,48 @@
-import streamlit as st
 import pandas as pd
 import numpy as np
+import streamlit as st
 import joblib
-import os
-from sklearn.ensemble import RandomForestClassifier
 
-st.write("""
-# Penguin Prediction App
+# Load the dataset
+@st.cache
+def load_data():
+    return pd.read_csv("https://raw.githubusercontent.com/dataprofessor/data/master/penguins_cleaned.csv")
 
-This app predicts the **Palmer Penguin** species!
+df = load_data()
 
-Data obtained from the [palmerpenguins library](https://github.com/allisonhorst/palmerpenguins) in R by Allison Horst.
-""")
+# Sidebar
+st.sidebar.subheader("User Input Features")
+selected_features = st.sidebar.selectbox("Features", df.columns[:-1])
 
-st.sidebar.header('User Input Features')
+# Load the model
+model_path = "penguins_clf.pkl"
+load_clf = joblib.load(model_path)
 
-st.sidebar.markdown("""
-[Example CSV input file](https://raw.githubusercontent.com/dataprofessor/data/master/penguins_example.csv)
-""")
+# Title of the app
+st.title("Palmer Penguins Species Prediction")
 
-# Collects user input features into dataframe
-uploaded_file = st.sidebar.file_uploader("Upload your input CSV file", type=["csv"])
-if uploaded_file is not None:
-    input_df = pd.read_csv(uploaded_file)
-else:
-    def user_input_features():
-        island = st.sidebar.selectbox('Island', ('Biscoe', 'Dream', 'Torgersen'))
-        sex = st.sidebar.selectbox('Sex', ('male', 'female'))
-        bill_length_mm = st.sidebar.slider('Bill length (mm)', 32.1, 59.6, 43.9)
-        bill_depth_mm = st.sidebar.slider('Bill depth (mm)', 13.1, 21.5, 17.2)
-        flipper_length_mm = st.sidebar.slider('Flipper length (mm)', 172.0, 231.0, 201.0)
-        body_mass_g = st.sidebar.slider('Body mass (g)', 2700.0, 6300.0, 4207.0)
-        data = {'island': island,
-                'bill_length_mm': bill_length_mm,
-                'bill_depth_mm': bill_depth_mm,
-                'flipper_length_mm': flipper_length_mm,
-                'body_mass_g': body_mass_g,
-                'sex': sex}
-        features = pd.DataFrame(data, index=[0])
-        return features
-    input_df = user_input_features()
+# Show the dataset
+if st.checkbox("Show DataFrame"):
+    st.write(df)
 
-# Combines user input features with entire penguins dataset
-# This will be useful for the encoding phase
-penguins_raw = pd.read_csv('penguins_cleaned.csv')
-penguins = penguins_raw.drop(columns=['species'])
-df = pd.concat([input_df, penguins], axis=0)
+# Input form to get user input
+def user_input_features():
+    input_features = []
+    for feature in df.columns[:-1]:
+        value = st.sidebar.slider(f"Select {feature}", float(df[feature].min()), float(df[feature].max()), float(df[feature].mean()))
+        input_features.append(value)
+    return np.array(input_features).reshape(1, -1)
 
-# Encoding of ordinal features
-# https://www.kaggle.com/pratik1120/penguin-dataset-eda-classification-and-clustering
-encode = ['sex', 'island']
-for col in encode:
-    dummy = pd.get_dummies(df[col], prefix=col)
-    df = pd.concat([df, dummy], axis=1)
-    del df[col]
-df = df[:1]  # Selects only the first row (the user input data)
+input_data = user_input_features()
 
-# Displays the user input features
-st.subheader('User Input features')
+# Make predictions
+prediction = load_clf.predict(input_data)
+prediction_proba = load_clf.predict_proba(input_data)
 
-if uploaded_file is not None:
-    st.write(input_df)
-else:
-    st.write('Awaiting CSV file to be uploaded. Currently using example input parameters (shown below).')
-    st.write(input_df)
+# Display predictions
+species = np.array(['Adelie', 'Chinstrap', 'Gentoo'])
+st.subheader("Prediction")
+st.write(species[prediction][0])
 
-# Reads in saved classification model
-model_path = 'penguins_clf.pkl'
-if os.path.exists(model_path):
-    load_clf = joblib.load(model_path)
-else:
-    st.error(f'Model file {model_path} not found. Please ensure the file is in the correct directory.')
-
-# Apply model to make predictions
-if 'load_clf' in locals():
-    prediction = load_clf.predict(df)
-    prediction_proba = load_clf.predict_proba(df)
-
-    st.subheader('Prediction')
-    penguins_species = np.array(['Adelie', 'Chinstrap', 'Gentoo'])
-    st.write(penguins_species[prediction])
-
-    st.subheader('Prediction Probability')
-    st.write(prediction_proba)
+st.subheader("Prediction Probability")
+st.write(prediction_proba)
