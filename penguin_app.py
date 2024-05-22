@@ -8,7 +8,7 @@ import numpy as np
 def load_model(model_path):
     try:
         # Load the model
-        model = joblib.load(model_path, mmap_mode=None)
+        model = joblib.load(model_path)
         
         # Manually convert the dtype of the node array if necessary
         if isinstance(model, np.ndarray) and model.dtype.names != ('left_child', 'right_child', 'feature', 'threshold', 'impurity', 'n_node_samples', 'weighted_n_node_samples', 'missing_go_to_left'):
@@ -34,7 +34,7 @@ def main():
         st.sidebar.write("Model uploaded successfully!")
 
     # Load the model if it exists
-    model_path = "uploaded_model.pkl"  # Path to the saved model file
+    model_path = "penguins_clf.pkl"  # Path to the saved model file
     if st.sidebar.button("Load Model"):
         model = load_model(model_path)
         if model is not None:
