@@ -7,8 +7,13 @@ import numpy as np
 @st.cache(allow_output_mutation=True)
 def load_model(model_path):
     try:
-        # Load the model with custom dtype for the node array
+        # Load the model
         model = joblib.load(model_path, mmap_mode=None)
+        
+        # Manually convert the dtype of the node array if necessary
+        if isinstance(model, np.ndarray) and model.dtype.names != ('left_child', 'right_child', 'feature', 'threshold', 'impurity', 'n_node_samples', 'weighted_n_node_samples', 'missing_go_to_left'):
+            model = model.astype([('left_child', '<i8'), ('right_child', '<i8'), ('feature', '<i8'), ('threshold', '<f8'), ('impurity', '<f8'), ('n_node_samples', '<i8'), ('weighted_n_node_samples', '<f8'), ('missing_go_to_left', 'u1')])
+        
         st.write("Model loaded successfully!")
         return model
     except Exception as e:
