@@ -12,9 +12,17 @@ def load_model(model_path):
         
         # Manually convert the dtype of the node array if necessary
         if isinstance(model, np.ndarray) and model.dtype.names != ('left_child', 'right_child', 'feature', 'threshold', 'impurity', 'n_node_samples', 'weighted_n_node_samples', 'missing_go_to_left'):
-            model = model.view(np.recarray)  # Convert to recarray
-            model.dtype = [('left_child', '<i8'), ('right_child', '<i8'), ('feature', '<i8'), ('threshold', '<f8'), ('impurity', '<f8'), ('n_node_samples', '<i8'), ('weighted_n_node_samples', '<f8'), ('missing_go_to_left', 'u1')]
-
+            new_dtype = [('left_child', '<i8'), ('right_child', '<i8'), ('feature', '<i8'), ('threshold', '<f8'), ('impurity', '<f8'), ('n_node_samples', '<i8'), ('weighted_n_node_samples', '<f8'), ('missing_go_to_left', 'u1')]
+            model = np.empty(model.shape, dtype=new_dtype)
+            model['left_child'] = model['left_child'].astype('<i8')
+            model['right_child'] = model['right_child'].astype('<i8')
+            model['feature'] = model['feature'].astype('<i8')
+            model['threshold'] = model['threshold'].astype('<f8')
+            model['impurity'] = model['impurity'].astype('<f8')
+            model['n_node_samples'] = model['n_node_samples'].astype('<i8')
+            model['weighted_n_node_samples'] = model['weighted_n_node_samples'].astype('<f8')
+            model['missing_go_to_left'] = model['missing_go_to_left'].astype('u1')
+        
         st.write("Model loaded successfully!")
         return model
     except Exception as e:
