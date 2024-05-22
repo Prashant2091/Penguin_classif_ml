@@ -4,9 +4,9 @@ import joblib
 
 # Define a function to load the model
 @st.cache(allow_output_mutation=True)
-def load_model(model_path):
+def load_model(uploaded_file):
     try:
-        model = joblib.load(model_path)
+        model = joblib.load(uploaded_file)
         st.write("Model loaded successfully!")
         return model
     except Exception as e:
@@ -33,26 +33,28 @@ def preprocess_input(bill_length_mm, bill_depth_mm, flipper_length_mm, body_mass
 def main():
     st.title("Palmer Penguin Species Prediction")
     
-    # Load the model
-    model_path = "penguins_clf.pkl"
-    model = load_model(model_path)
-    if model is None:
-        st.error("Failed to load the model. Please upload a valid model file.")
+    # Upload model file
+    uploaded_file = st.file_uploader("Upload model file", type=["pkl"])
+    if uploaded_file is not None:
+        # Load the model if file uploaded
+        model = load_model(uploaded_file)
+    else:
+        st.error("Please upload a model file.")
 
-    # Streamlit app input fields
-    bill_length_mm = st.number_input("Bill Length (mm)", min_value=0.0, max_value=100.0, value=40.0)
-    bill_depth_mm = st.number_input("Bill Depth (mm)", min_value=0.0, max_value=100.0, value=20.0)
-    flipper_length_mm = st.number_input("Flipper Length (mm)", min_value=0.0, max_value=100.0, value=200.0)
-    body_mass_g = st.number_input("Body Mass (g)", min_value=0.0, max_value=10000.0, value=4000.0)
-    sex_female = st.checkbox("Female")
-    sex_male = st.checkbox("Male")
-    island_Biscoe = st.checkbox("Biscoe")
-    island_Dream = st.checkbox("Dream")
-    island_Torgersen = st.checkbox("Torgersen")
+    if model is not None:
+        # Streamlit app input fields
+        bill_length_mm = st.number_input("Bill Length (mm)", min_value=0.0, max_value=100.0, value=40.0)
+        bill_depth_mm = st.number_input("Bill Depth (mm)", min_value=0.0, max_value=100.0, value=20.0)
+        flipper_length_mm = st.number_input("Flipper Length (mm)", min_value=0.0, max_value=100.0, value=200.0)
+        body_mass_g = st.number_input("Body Mass (g)", min_value=0.0, max_value=10000.0, value=4000.0)
+        sex_female = st.checkbox("Female")
+        sex_male = st.checkbox("Male")
+        island_Biscoe = st.checkbox("Biscoe")
+        island_Dream = st.checkbox("Dream")
+        island_Torgersen = st.checkbox("Torgersen")
 
-    # Predict button
-    if st.button("Predict"):
-        if model is not None:
+        # Predict button
+        if st.button("Predict"):
             # Preprocess input data
             input_data = preprocess_input(bill_length_mm, bill_depth_mm, flipper_length_mm, body_mass_g, sex_female, sex_male, island_Biscoe, island_Dream, island_Torgersen)
             # Make prediction
