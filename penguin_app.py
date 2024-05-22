@@ -20,6 +20,23 @@ def load_model(model_path):
         st.error(f"Error loading model: {e}")
         return None
 
+# Function to preprocess input data
+def preprocess_input(bill_length_mm, bill_depth_mm, flipper_length_mm, body_mass_g, sex_female, sex_male, island_Biscoe, island_Dream, island_Torgersen):
+    # Create a DataFrame with the input values
+    data = {
+        'bill_length_mm': [bill_length_mm],
+        'bill_depth_mm': [bill_depth_mm],
+        'flipper_length_mm': [flipper_length_mm],
+        'body_mass_g': [body_mass_g],
+        'sex_female': [sex_female],
+        'sex_male': [sex_male],
+        'island_Biscoe': [island_Biscoe],
+        'island_Dream': [island_Dream],
+        'island_Torgersen': [island_Torgersen]
+    }
+    input_df = pd.DataFrame(data)
+    return input_df
+
 # Main function to load the model and perform predictions
 def main():
     st.title("Penguin Species Prediction App")
@@ -59,23 +76,6 @@ def main():
                 prediction = model.predict(input_data)
                 # Display prediction
                 st.write("Predicted Species:", prediction)
-
-# Function to preprocess input data
-def preprocess_input(bill_length_mm, bill_depth_mm, flipper_length_mm, body_mass_g, sex_female, sex_male, island_Biscoe, island_Dream, island_Torgersen):
-    # Create a DataFrame with the input values
-    data = {
-        'bill_length_mm': [bill_length_mm],
-        'bill_depth_mm': [bill_depth_mm],
-        'flipper_length_mm': [flipper_length_mm],
-        'body_mass_g': [body_mass_g],
-        'sex_female': [sex_female],
-        'sex_male': [sex_male],
-        'island_Biscoe': [island_Biscoe],
-        'island_Dream': [island_Dream],
-        'island_Torgersen': [island_Torgersen]
-    }
-    input_df = pd.DataFrame(data)
-    return input_df
 
 if __name__ == "__main__":
     main()
