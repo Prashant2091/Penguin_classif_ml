@@ -1,69 +1,61 @@
 import streamlit as st
 import pandas as pd
 import joblib
+from sklearn.tree import DecisionTreeClassifier
 
-# Define a function to load the model
+# Function to train and save the model
+def train_and_save_model():
+    # Load the dataset
+    df = pd.read_csv("penguins.csv")
+
+    # Preprocess the data
+    # (Add your preprocessing code here)
+
+    # Define features and target variable
+    X = df.drop(columns=['species'])
+    y = df['species']
+
+    # Train a Decision Tree Classifier
+    clf = DecisionTreeClassifier()
+    clf.fit(X, y)
+
+    # Save the model
+    joblib.dump(clf, "penguins_clf.pkl")
+    st.write("Model trained and saved successfully!")
+
+# Load the model
 @st.cache(allow_output_mutation=True)
-def load_model(uploaded_file):
+def load_model(model_path):
     try:
-        model = joblib.load(uploaded_file)
+        model = joblib.load(model_path)
         st.write("Model loaded successfully!")
         return model
     except Exception as e:
         st.error(f"Error loading model: {e}")
         return None
 
-# Function to preprocess input data
-def preprocess_input(bill_length_mm, bill_depth_mm, flipper_length_mm, body_mass_g, sex_female, sex_male, island_Biscoe, island_Dream, island_Torgersen):
-    # Create a DataFrame with the input values
-    data = {
-        'bill_length_mm': [bill_length_mm],
-        'bill_depth_mm': [bill_depth_mm],
-        'flipper_length_mm': [flipper_length_mm],
-        'body_mass_g': [body_mass_g],
-        'sex_female': [sex_female],
-        'sex_male': [sex_male],
-        'island_Biscoe': [island_Biscoe],
-        'island_Dream': [island_Dream],
-        'island_Torgersen': [island_Torgersen]
-    }
-    input_df = pd.DataFrame(data)
-    return input_df
-
+# Main function to load the model and perform predictions
 def main():
-    st.title("Palmer Penguin Species Prediction")
-    
-    # Initialize model variable
-    model = None
-    
-    # Upload model file
-    uploaded_file = st.file_uploader("Upload model file", type=["pkl"])
+    st.title("Penguin Species Prediction App")
+    st.sidebar.title("Choose Model")
+
+    # Add a file uploader to let the user upload the model file
+    uploaded_file = st.sidebar.file_uploader("Upload model file", type=["pkl"])
     if uploaded_file is not None:
-        # Load the model if file uploaded
-        model = load_model(uploaded_file)
-    else:
-        st.error("Please upload a model file.")
+        # Save the uploaded file
+        with open("uploaded_model.pkl", "wb") as f:
+            f.write(uploaded_file.getvalue())
+        st.sidebar.write("Model uploaded successfully!")
 
-    if model is not None:
-        # Streamlit app input fields
-        bill_length_mm = st.number_input("Bill Length (mm)", min_value=0.0, max_value=100.0, value=40.0)
-        bill_depth_mm = st.number_input("Bill Depth (mm)", min_value=0.0, max_value=100.0, value=20.0)
-        flipper_length_mm = st.number_input("Flipper Length (mm)", min_value=0.0, max_value=100.0, value=200.0)
-        body_mass_g = st.number_input("Body Mass (g)", min_value=0.0, max_value=10000.0, value=4000.0)
-        sex_female = st.checkbox("Female")
-        sex_male = st.checkbox("Male")
-        island_Biscoe = st.checkbox("Biscoe")
-        island_Dream = st.checkbox("Dream")
-        island_Torgersen = st.checkbox("Torgersen")
+    # Load the model if it exists
+    model_path = "uploaded_model.pkl"  # Path to the saved model file
+    if st.sidebar.button("Load Model"):
+        model = load_model(model_path)
+        if model is None:
+            st.warning("Please upload a valid model file.")
+        else:
+            st.success("Model loaded successfully!")
 
-        # Predict button
-        if st.button("Predict"):
-            # Preprocess input data
-            input_data = preprocess_input(bill_length_mm, bill_depth_mm, flipper_length_mm, body_mass_g, sex_female, sex_male, island_Biscoe, island_Dream, island_Torgersen)
-            # Make prediction
-            prediction = model.predict(input_data)
-            # Display prediction
-            st.write("Predicted Species:", prediction)
-
+# Run the main function
 if __name__ == "__main__":
     main()
