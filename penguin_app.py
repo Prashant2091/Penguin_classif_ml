@@ -73,7 +73,7 @@ st.write("Contents of the current working directory:")
 st.write(os.listdir(os.getcwd()))
 
 # Reads in saved classification model
-model_path = 'penguins_clf.pkl'
+model_path = 'penguins_clf .pkl'
 if os.path.exists(model_path):
     with open(model_path, 'rb') as model_file:
         load_clf = pickle.load(model_file)
