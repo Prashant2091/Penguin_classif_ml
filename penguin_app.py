@@ -29,12 +29,12 @@ def main():
     uploaded_file = st.sidebar.file_uploader("Upload model file", type=["pkl"])
     if uploaded_file is not None:
         # Save the uploaded file
-        with open("uploaded_model.pkl", "wb") as f:
+        with open("penguins_clf_fixed.pkl", "wb") as f:
             f.write(uploaded_file.getvalue())
         st.sidebar.write("Model uploaded successfully!")
 
     # Load the model if it exists
-    model_path = "penguins_clf.pkl"  # Path to the saved model file
+    model_path = "penguins_clf_fixed.pkl"  # Path to the saved model file
     if st.sidebar.button("Load Model"):
         model = load_model(model_path)
         if model is not None:
