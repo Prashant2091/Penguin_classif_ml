@@ -67,6 +67,7 @@ else:
 
 # Reads in saved classification model
 model_path = 'penguins_clf.pkl'
+st.write(f'Checking model file at: {os.path.abspath(model_path)}')  # Debug print
 if os.path.exists(model_path):
     with open(model_path, 'rb') as model_file:
         load_clf = pickle.load(model_file)
