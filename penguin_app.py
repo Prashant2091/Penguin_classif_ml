@@ -86,11 +86,23 @@ This app predicts the **Palmer Penguin** species!
 Data obtained from the [palmerpenguins library](https://github.com/allisonhorst/palmerpenguins) in R by Allison Horst.
 """)
 
+#import streamlit as st
+import cloudpickle
+import numpy as np
+
+st.write("""
+# Penguin Prediction App
+
+This app predicts the **Palmer Penguin** species!
+
+Data obtained from the [palmerpenguins library](https://github.com/allisonhorst/palmerpenguins) in R by Allison Horst.
+""")
+
 # Load the trained model
 model_path = 'penguins_clf.pkl'
 try:
     with open(model_path, 'rb') as f:
-        model = joblib.load(f)
+        model = cloudpickle.load(f)
 except FileNotFoundError:
     st.error(f"Model file {model_path} not found. Please ensure the file is in the correct directory.")
     st.stop()
@@ -101,21 +113,7 @@ except Exception as e:
 # Inspect the loaded model
 st.write("Model type:", type(model))
 
-# If the loaded model is a scikit-learn model, print its attributes
-if hasattr(model, 'tree_'):
-    st.write("Model attributes:", model.__dict__.keys())
-
-# If the loaded model is a NumPy array, print its shape, dtype, and contents
-elif isinstance(model, np.ndarray):
-    st.write("Array shape:", model.shape)
-    st.write("Array dtype:", model.dtype)
-    st.write("Array contents:")
-    for item in model:
-        st.write(item)
-
-# If the loaded model is neither a scikit-learn model nor a NumPy array, display an error
-else:
-    st.error("Loaded model type not recognized. Please ensure that the correct model file is used.")
+# Additional Streamlit app code (e.g., user input features, prediction logic) goes here
 
 # Additional Streamlit app code (e.g., user input features, prediction logic) goes here
 
