@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import pickle
+import joblib
 import os
 from sklearn.ensemble import RandomForestClassifier
 
@@ -76,18 +76,25 @@ st.write(os.listdir(os.getcwd()))
 model_path = 'penguins_clf.pkl'
 if os.path.exists(model_path):
     with open(model_path, 'rb') as model_file:
-        load_clf = pickle.load(model_file)
+        load_clf = joblib.load(model_file)
+        
+        # Debugging: Print the type and content of the loaded model
+        st.write("Loaded model:", type(load_clf))
+        st.write(load_clf)
 else:
     st.error(f'Model file {model_path} not found. Please ensure the file is in the correct directory.')
 
 # Apply model to make predictions
 if 'load_clf' in locals():
-    prediction = load_clf.predict(df)
-    prediction_proba = load_clf.predict_proba(df)
+    if isinstance(load_clf, RandomForestClassifier):  # Ensure it's the expected model type
+        prediction = load_clf.predict(df)
+        prediction_proba = load_clf.predict_proba(df)
 
-    st.subheader('Prediction')
-    penguins_species = np.array(['Adelie', 'Chinstrap', 'Gentoo'])
-    st.write(penguins_species[prediction])
+        st.subheader('Prediction')
+        penguins_species = np.array(['Adelie', 'Chinstrap', 'Gentoo'])
+        st.write(penguins_species[prediction])
 
-    st.subheader('Prediction Probability')
-    st.write(prediction_proba)
+        st.subheader('Prediction Probability')
+        st.write(prediction_proba)
+    else:
+        st.error("The loaded model is not a RandomForestClassifier instance.")
