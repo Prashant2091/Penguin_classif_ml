@@ -1,14 +1,8 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Oct  3 04:33:31 2022
-
-@author: Satyam
-"""
-
 import streamlit as st
 import pandas as pd
 import numpy as np
 import pickle
+import os
 from sklearn.ensemble import RandomForestClassifier
 
 st.write("""
@@ -31,8 +25,8 @@ if uploaded_file is not None:
     input_df = pd.read_csv(uploaded_file)
 else:
     def user_input_features():
-        island = st.sidebar.selectbox('Island',('Biscoe','Dream','Torgersen'))
-        sex = st.sidebar.selectbox('Sex',('male','female'))
+        island = st.sidebar.selectbox('Island', ('Biscoe', 'Dream', 'Torgersen'))
+        sex = st.sidebar.selectbox('Sex', ('male', 'female'))
         bill_length_mm = st.sidebar.slider('Bill length (mm)', 32.1, 59.6, 43.9)
         bill_depth_mm = st.sidebar.slider('Bill depth (mm)', 13.1, 21.5, 17.2)
         flipper_length_mm = st.sidebar.slider('Flipper length (mm)', 172.0, 231.0, 201.0)
@@ -49,7 +43,7 @@ else:
 
 # Combines user input features with entire penguins dataset
 # This will be useful for the encoding phase
-penguins_raw = pd.read_csv('https://raw.githubusercontent.com/dataprofessor/streamlit_freecodecamp/main/app_8_classification_penguins/penguins_cleaned.csv')
+penguins_raw = pd.read_csv('penguins_cleaned.csv')
 penguins = penguins_raw.drop(columns=['species'])
 df = pd.concat([input_df, penguins], axis=0)
 
@@ -72,15 +66,21 @@ else:
     st.write(input_df)
 
 # Reads in saved classification model
-load_clf = pickle.load(open('penguins_clf.pkl', 'rb'))
+model_path = 'penguins_clf.pkl'
+if os.path.exists(model_path):
+    with open(model_path, 'rb') as model_file:
+        load_clf = pickle.load(model_file)
+else:
+    st.error(f'Model file {model_path} not found. Please ensure the file is in the correct directory.')
 
 # Apply model to make predictions
-prediction = load_clf.predict(df)
-prediction_proba = load_clf.predict_proba(df)
+if 'load_clf' in locals():
+    prediction = load_clf.predict(df)
+    prediction_proba = load_clf.predict_proba(df)
 
-st.subheader('Prediction')
-penguins_species = np.array(['Adelie', 'Chinstrap', 'Gentoo'])
-st.write(penguins_species[prediction])
+    st.subheader('Prediction')
+    penguins_species = np.array(['Adelie', 'Chinstrap', 'Gentoo'])
+    st.write(penguins_species[prediction])
 
-st.subheader('Prediction Probability')
-st.write(prediction_proba)
+    st.subheader('Prediction Probability')
+    st.write(prediction_proba)
