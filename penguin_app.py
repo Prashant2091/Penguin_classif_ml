@@ -3,7 +3,6 @@ import pandas as pd
 import numpy as np
 import joblib
 import os
-import traceback
 from sklearn.ensemble import RandomForestClassifier
 
 st.write("""
@@ -66,68 +65,21 @@ else:
     st.write('Awaiting CSV file to be uploaded. Currently using example input parameters (shown below).')
     st.write(input_df)
 
-# Debugging: Print the current working directory
-st.write(f"Current working directory: {os.getcwd()}")
-
-# Debugging: Print the contents of the current working directory
-st.write("Contents of the current working directory:")
-st.write(os.listdir(os.getcwd()))
-
 # Reads in saved classification model
-import streamlit as st
-import joblib
-import numpy as np
-
-st.write("""
-# Penguin Prediction App
-
-This app predicts the **Palmer Penguin** species!
-
-Data obtained from the [palmerpenguins library](https://github.com/allisonhorst/palmerpenguins) in R by Allison Horst.
-""")
-
-#import streamlit as st
-import cloudpickle
-import numpy as np
-
-st.write("""
-# Penguin Prediction App
-
-This app predicts the **Palmer Penguin** species!
-
-Data obtained from the [palmerpenguins library](https://github.com/allisonhorst/palmerpenguins) in R by Allison Horst.
-""")
-
-# Load the trained model
 model_path = 'penguins_clf.pkl'
-try:
-    with open(model_path, 'rb') as f:
-        model = cloudpickle.load(f)
-except FileNotFoundError:
-    st.error(f"Model file {model_path} not found. Please ensure the file is in the correct directory.")
-    st.stop()
-except Exception as e:
-    st.error(f"Error loading model: {e}")
-    st.stop()
-
-# Inspect the loaded model
-st.write("Model type:", type(model))
-
-# Additional Streamlit app code (e.g., user input features, prediction logic) goes here
-
-# Additional Streamlit app code (e.g., user input features, prediction logic) goes here
+if os.path.exists(model_path):
+    load_clf = joblib.load(model_path)
+else:
+    st.error(f'Model file {model_path} not found. Please ensure the file is in the correct directory.')
 
 # Apply model to make predictions
 if 'load_clf' in locals():
-    if isinstance(load_clf, RandomForestClassifier):  # Ensure it's the expected model type
-        prediction = load_clf.predict(df)
-        prediction_proba = load_clf.predict_proba(df)
+    prediction = load_clf.predict(df)
+    prediction_proba = load_clf.predict_proba(df)
 
-        st.subheader('Prediction')
-        penguins_species = np.array(['Adelie', 'Chinstrap', 'Gentoo'])
-        st.write(penguins_species[prediction])
+    st.subheader('Prediction')
+    penguins_species = np.array(['Adelie', 'Chinstrap', 'Gentoo'])
+    st.write(penguins_species[prediction])
 
-        st.subheader('Prediction Probability')
-        st.write(prediction_proba)
-    else:
-        st.error("The loaded model is not a RandomForestClassifier instance.")
+    st.subheader('Prediction Probability')
+    st.write(prediction_proba)
