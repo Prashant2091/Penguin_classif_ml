@@ -33,6 +33,9 @@ def preprocess_input(bill_length_mm, bill_depth_mm, flipper_length_mm, body_mass
 def main():
     st.title("Palmer Penguin Species Prediction")
     
+    # Initialize model variable
+    model = None
+    
     # Upload model file
     uploaded_file = st.file_uploader("Upload model file", type=["pkl"])
     if uploaded_file is not None:
