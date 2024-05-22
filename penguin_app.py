@@ -12,22 +12,27 @@ def load_model(model_path):
         
         # Manually convert the dtype of the node array if necessary
         if isinstance(model, np.ndarray) and model.dtype.names != ('left_child', 'right_child', 'feature', 'threshold', 'impurity', 'n_node_samples', 'weighted_n_node_samples', 'missing_go_to_left'):
-            new_dtype = [('left_child', '<i8'), ('right_child', '<i8'), ('feature', '<i8'), ('threshold', '<f8'), ('impurity', '<f8'), ('n_node_samples', '<i8'), ('weighted_n_node_samples', '<f8'), ('missing_go_to_left', 'u1')]
-            model = np.empty(model.shape, dtype=new_dtype)
-            model['left_child'] = model['left_child'].astype('<i8')
-            model['right_child'] = model['right_child'].astype('<i8')
-            model['feature'] = model['feature'].astype('<i8')
-            model['threshold'] = model['threshold'].astype('<f8')
-            model['impurity'] = model['impurity'].astype('<f8')
-            model['n_node_samples'] = model['n_node_samples'].astype('<i8')
-            model['weighted_n_node_samples'] = model['weighted_n_node_samples'].astype('<f8')
-            model['missing_go_to_left'] = model['missing_go_to_left'].astype('u1')
+            model = convert_dtype(model)
         
         st.write("Model loaded successfully!")
         return model
     except Exception as e:
         st.error(f"Error loading model: {e}")
         return None
+
+# Function to convert dtype of the node array
+def convert_dtype(model):
+    new_dtype = [('left_child', '<i8'), ('right_child', '<i8'), ('feature', '<i8'), ('threshold', '<f8'), ('impurity', '<f8'), ('n_node_samples', '<i8'), ('weighted_n_node_samples', '<f8'), ('missing_go_to_left', 'u1')]
+    new_model = np.empty(model.shape, dtype=new_dtype)
+    new_model['left_child'] = model['left_child']
+    new_model['right_child'] = model['right_child']
+    new_model['feature'] = model['feature']
+    new_model['threshold'] = model['threshold']
+    new_model['impurity'] = model['impurity']
+    new_model['n_node_samples'] = model['n_node_samples']
+    new_model['weighted_n_node_samples'] = model['weighted_n_node_samples']
+    new_model['missing_go_to_left'] = np.array(model['missing_go_to_left'], dtype='u1')
+    return new_model
 
 # Main function to load the model and perform predictions
 def main():
