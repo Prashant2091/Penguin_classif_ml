@@ -4,9 +4,33 @@ import joblib
 
 # Load the model
 @st.cache(allow_output_mutation=True)
+# Define a function to load the model
 def load_model(model_path):
-    return joblib.load(model_path)
+    try:
+        model = joblib.load(model_path)
+        st.write("Model loaded successfully!")
+        return model
+    except Exception as e:
+        st.error(f"Error loading model: {e}")
+        return None
 
+# Main function to load the model and perform predictions
+def main():
+    st.title("Penguin Species Prediction App")
+    st.sidebar.title("Choose Model")
+
+    # Add a file uploader to let the user upload the model file
+    uploaded_file = st.sidebar.file_uploader("Upload model file", type=["pkl"])
+    if uploaded_file is not None:
+        # Save the uploaded file
+        with open("uploaded_model.pkl", "wb") as f:
+            f.write(uploaded_file.getvalue())
+        st.sidebar.write("Model uploaded successfully!")
+
+    # Load the model if it exists
+    model_path = "uploaded_model.pkl"  # Path to the saved model file
+    if st.sidebar.button("Load Model"):
+        model = load_model(model_path)
 # Function to preprocess input data
 def preprocess_input(bill_length_mm, bill_depth_mm, flipper_length_mm, body_mass_g, sex_female, sex_male, island_Biscoe, island_Dream, island_Torgersen):
     # Create a DataFrame with the input values
