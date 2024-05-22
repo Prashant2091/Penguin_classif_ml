@@ -1,48 +1,46 @@
-import pandas as pd
-import numpy as np
 import streamlit as st
 import joblib
+import pandas as pd
 
-# Load the dataset
-@st.cache
-def load_data():
-    return pd.read_csv("https://raw.githubusercontent.com/dataprofessor/data/master/penguins_cleaned.csv")
-
-df = load_data()
-
-# Sidebar
-st.sidebar.subheader("User Input Features")
-selected_features = st.sidebar.selectbox("Features", df.columns[:-1])
+# Load the model
+@st.cache(allow_output_mutation=True)
+def load_model(model_path):
+    return joblib.load(model_path)
 
 # Load the model
 model_path = "penguins_clf.pkl"
-load_clf = joblib.load(model_path)
+load_clf = load_model(model_path)
 
-# Title of the app
-st.title("Palmer Penguins Species Prediction")
+# Define the input fields
+st.title("Palmer Penguin Species Prediction")
+bill_length_mm = st.number_input("Bill Length (mm)", min_value=0.0, max_value=100.0, value=40.0)
+bill_depth_mm = st.number_input("Bill Depth (mm)", min_value=0.0, max_value=100.0, value=20.0)
+flipper_length_mm = st.number_input("Flipper Length (mm)", min_value=0.0, max_value=100.0, value=200.0)
+body_mass_g = st.number_input("Body Mass (g)", min_value=0.0, max_value=10000.0, value=4000.0)
+sex_female = st.checkbox("Female")
+sex_male = st.checkbox("Male")
+island_biscoe = st.checkbox("Biscoe")
+island_dream = st.checkbox("Dream")
+island_torgersen = st.checkbox("Torgersen")
 
-# Show the dataset
-if st.checkbox("Show DataFrame"):
-    st.write(df)
+# Prepare input data
+data = {
+    'bill_length_mm': bill_length_mm,
+    'bill_depth_mm': bill_depth_mm,
+    'flipper_length_mm': flipper_length_mm,
+    'body_mass_g': body_mass_g,
+    'sex_female': sex_female,
+    'sex_male': sex_male,
+    'island_Biscoe': island_biscoe,
+    'island_Dream': island_dream,
+    'island_Torgersen': island_torgersen
+}
 
-# Input form to get user input
-def user_input_features():
-    input_features = []
-    for feature in df.columns[:-1]:
-        value = st.sidebar.slider(f"Select {feature}", float(df[feature].min()), float(df[feature].max()), float(df[feature].mean()))
-        input_features.append(value)
-    return np.array(input_features).reshape(1, -1)
+input_df = pd.DataFrame([data])
 
-input_data = user_input_features()
+# Make prediction
+prediction = load_clf.predict(input_df)
 
-# Make predictions
-prediction = load_clf.predict(input_data)
-prediction_proba = load_clf.predict_proba(input_data)
-
-# Display predictions
-species = np.array(['Adelie', 'Chinstrap', 'Gentoo'])
+# Display prediction
 st.subheader("Prediction")
-st.write(species[prediction][0])
-
-st.subheader("Prediction Probability")
-st.write(prediction_proba)
+st.write(prediction)
