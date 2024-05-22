@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import joblib
 import os
+import traceback
 from sklearn.ensemble import RandomForestClassifier
 
 st.write("""
@@ -76,11 +77,11 @@ st.write(os.listdir(os.getcwd()))
 model_path = 'penguins_clf.pkl'
 if os.path.exists(model_path):
     with open(model_path, 'rb') as model_file:
-        load_clf = joblib.load(model_file)
-        
-        # Debugging: Print the type and content of the loaded model
-        st.write("Loaded model:", type(load_clf))
-        st.write(load_clf)
+        try:
+            load_clf = joblib.load(model_file)
+        except Exception as e:
+            st.error(f"Error loading model: {e}")
+            st.error(traceback.format_exc())
 else:
     st.error(f'Model file {model_path} not found. Please ensure the file is in the correct directory.')
 
